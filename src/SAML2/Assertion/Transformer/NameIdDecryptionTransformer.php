@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace SAML2\Assertion\Transformer;
 
+use Exception;
 use Psr\Log\LoggerInterface;
 use SAML2\XML\saml\Assertion;
+use SAML2\XML\saml\EncryptedID;
 use SAML2\Assertion\Exception\NotDecryptedException;
 use SAML2\Certificate\PrivateKeyLoader;
 use SAML2\Configuration\IdentityProvider;
@@ -61,7 +63,8 @@ final class NameIdDecryptionTransformer implements
      */
     public function transform(Assertion $assertion): Assertion
     {
-        if (!$assertion->isNameIdEncrypted()) {
+        $identifier = $assertion->getIdentifier();
+        if (!($identifier instanceof EncryptedID)) {
             return $assertion;
         }
 
@@ -71,11 +74,13 @@ final class NameIdDecryptionTransformer implements
             $blacklistedKeys = $this->serviceProvider->getBlacklistedAlgorithms();
         }
 
+        $decrypted = null;
         foreach ($decryptionKeys as $index => $key) {
             try {
-                $assertion->decryptNameId($key, $blacklistedKeys);
+                $decrypted = $identifier->decrypt($key, $blacklistedKeys);
                 $this->logger->debug(sprintf('Decrypted assertion NameId with key "#%d"', $index));
-            } catch (\Exception $e) {
+                break;
+            } catch (Exception $e) {
                 $this->logger->debug(sprintf(
                     'Decrypting assertion NameId with key "#%d" failed, "%s" thrown: "%s"',
                     $index,
@@ -85,7 +90,7 @@ final class NameIdDecryptionTransformer implements
             }
         }
 
-        if ($assertion->isNameIdEncrypted()) {
+        if ($decrypted === null) {
             throw new NotDecryptedException(
                 'Could not decrypt the assertion NameId with the configured keys, see the debug log for information'
             );
