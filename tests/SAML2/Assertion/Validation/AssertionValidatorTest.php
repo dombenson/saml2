@@ -134,7 +134,18 @@ XML
     public function testAssertionNonValidation(): void
     {
         $assertion = new Assertion($this->document->firstChild);
-        $assertion->setValidAudiences(['https://example.edu/not-the-sp-entity-id']);
+        $assertion->setConditions(
+            new Conditions(
+                null,
+                null,
+                [],
+                [
+                    new AudienceRestriction(
+                        ['https://example.edu/not-the-sp-entity-id']
+                    )
+                ]
+            )
+        );
 
         $this->expectException(InvalidAssertionException::class);
         $this->expectExceptionMessage('The configured Service Provider [urn:mace:feide.no:services:no.feide.moodle] is not a valid audience for the assertion. Audiences: [https://example.edu/not-the-sp-entity-id]"');
