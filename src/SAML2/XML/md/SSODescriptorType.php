@@ -41,6 +41,15 @@ abstract class SSODescriptorType extends RoleDescriptor
     public $ManageNameIDService = [];
 
     /**
+     * List of SingleSignOnService endpoints.
+     *
+     * Array with EndpointType objects.
+     *
+     * @var \SAML2\XML\md\EndpointType[]
+     */
+    public $SingleSignOnService = [];
+
+    /**
      * List of supported NameID formats.
      *
      * Array of strings.
@@ -182,6 +191,38 @@ abstract class SSODescriptorType extends RoleDescriptor
 
 
     /**
+     * Collect the value of the SingleSignOnService-property
+     * @return \SAML2\XML\md\EndpointType[]
+     */
+    public function getSingleSignOnService()
+    {
+        return $this->SingleSignOnService;
+    }
+
+
+    /**
+     * Set the value of the SingleSignOnService-property
+     * @param array $singleSignOnService
+     * @return void
+     */
+    public function setSingleSignOnService(array $singleSignOnService)
+    {
+        $this->SingleSignOnService = $singleSignOnService;
+    }
+
+
+    /**
+     * Add the value to the SingleSignOnService-property
+     * @param \SAML2\XML\md\EndpointType $singleSignOnService
+     * @return void
+     */
+    public function addSingleSignOnService(EndpointType $singleSignOnService)
+    {
+        $this->SingleSignOnService[] = $singleSignOnService;
+    }
+
+
+    /**
      * Collect the value of the NameIDFormat-property
      * @return string[]
      */
@@ -214,6 +255,7 @@ abstract class SSODescriptorType extends RoleDescriptor
         Assert::isArray($this->getSingleLogoutService());
         Assert::isArray($this->getManageNameIDService());
         Assert::isArray($this->getNameIDFormat());
+        Assert::isArray($this->getSingleSignOnService());
 
         $e = parent::toXML($parent);
 
@@ -227,6 +269,10 @@ abstract class SSODescriptorType extends RoleDescriptor
 
         foreach ($this->getManageNameIDService() as $ep) {
             $ep->toXML($e, 'md:ManageNameIDService');
+        }
+
+        foreach ($this->getSingleSignOnService() as $ep) {
+            $ep->toXML($e, 'md:SingleSignOnService');
         }
 
         Utils::addStrings($e, Constants::NS_MD, 'md:NameIDFormat', false, $this->getNameIDFormat());

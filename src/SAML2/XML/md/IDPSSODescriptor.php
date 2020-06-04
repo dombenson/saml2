@@ -22,15 +22,6 @@ class IDPSSODescriptor extends SSODescriptorType
     public $WantAuthnRequestsSigned = null;
 
     /**
-     * List of SingleSignOnService endpoints.
-     *
-     * Array with EndpointType objects.
-     *
-     * @var \SAML2\XML\md\EndpointType[]
-     */
-    public $SingleSignOnService = [];
-
-    /**
      * List of NameIDMappingService endpoints.
      *
      * Array with EndpointType objects.
@@ -121,38 +112,6 @@ class IDPSSODescriptor extends SSODescriptorType
     {
         Assert::nullOrBoolean($flag);
         $this->WantAuthnRequestsSigned = $flag;
-    }
-
-
-    /**
-     * Collect the value of the SingleSignOnService-property
-     * @return \SAML2\XML\md\EndpointType[]
-     */
-    public function getSingleSignOnService()
-    {
-        return $this->SingleSignOnService;
-    }
-
-
-    /**
-     * Set the value of the SingleSignOnService-property
-     * @param array $singleSignOnService
-     * @return void
-     */
-    public function setSingleSignOnService(array $singleSignOnService)
-    {
-        $this->SingleSignOnService = $singleSignOnService;
-    }
-
-
-    /**
-     * Add the value to the SingleSignOnService-property
-     * @param \SAML2\XML\md\EndpointType $singleSignOnService
-     * @return void
-     */
-    public function addSingleSignOnService(EndpointType $singleSignOnService)
-    {
-        $this->SingleSignOnService[] = $singleSignOnService;
     }
 
 
@@ -282,7 +241,6 @@ class IDPSSODescriptor extends SSODescriptorType
     public function toXML(\DOMElement $parent)
     {
         Assert::nullOrBoolean($this->WantAuthnRequestsSigned());
-        Assert::isArray($this->getSingleSignOnService());
         Assert::isArray($this->getNameIDMappingService());
         Assert::isArray($this->getAssertionIDRequestService());
         Assert::isArray($this->getAttributeProfile());
@@ -294,10 +252,6 @@ class IDPSSODescriptor extends SSODescriptorType
             $e->setAttribute('WantAuthnRequestsSigned', 'true');
         } elseif ($this->WantAuthnRequestsSigned() === false) {
             $e->setAttribute('WantAuthnRequestsSigned', 'false');
-        }
-
-        foreach ($this->getSingleSignOnService() as $ep) {
-            $ep->toXML($e, 'md:SingleSignOnService');
         }
 
         foreach ($this->getNameIDMappingService() as $ep) {
